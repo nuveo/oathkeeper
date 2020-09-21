@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ory/fosite"
 	"github.com/ory/x/tracing"
@@ -52,9 +51,10 @@ type Provider interface {
 
 	ProxyServeAddress() string
 	APIServeAddress() string
-	PrometheusServeAddress() string
 
+	PrometheusServeAddress() string
 	PrometheusMetricsPath() string
+	PrometheusCollapseRequestPaths() bool
 
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)
@@ -83,7 +83,4 @@ type ProviderAuthorizers interface {
 type ProviderMutators interface {
 	MutatorConfig(id string, overrides json.RawMessage, destination interface{}) error
 	MutatorIsEnabled(id string) bool
-}
-
-func MustValidate(l logrus.FieldLogger, p Provider) {
 }

@@ -14,9 +14,9 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ory/viper"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/go-convenience/stringsx"
 
@@ -38,21 +38,22 @@ func init() {
 }
 
 const (
-	ViperKeyProxyReadTimeout           = "serve.proxy.timeout.read"
-	ViperKeyProxyWriteTimeout          = "serve.proxy.timeout.write"
-	ViperKeyProxyIdleTimeout           = "serve.proxy.timeout.idle"
-	ViperKeyProxyServeAddressHost      = "serve.proxy.host"
-	ViperKeyProxyServeAddressPort      = "serve.proxy.port"
-	ViperKeyAPIServeAddressHost        = "serve.api.host"
-	ViperKeyAPIServeAddressPort        = "serve.api.port"
-	ViperKeyAPIReadTimeout             = "serve.api.timeout.read"
-	ViperKeyAPIWriteTimeout            = "serve.api.timeout.write"
-	ViperKeyAPIIdleTimeout             = "serve.api.timeout.idle"
-	ViperKeyPrometheusServeAddressHost = "serve.prometheus.host"
-	ViperKeyPrometheusServeAddressPort = "serve.prometheus.port"
-	ViperKeyPrometheusServeMetricsPath = "serve.prometheus.metrics_path"
-	ViperKeyAccessRuleRepositories     = "access_rules.repositories"
-	ViperKeyAccessRuleMatchingStrategy = "access_rules.matching_strategy"
+	ViperKeyProxyReadTimeout                    = "serve.proxy.timeout.read"
+	ViperKeyProxyWriteTimeout                   = "serve.proxy.timeout.write"
+	ViperKeyProxyIdleTimeout                    = "serve.proxy.timeout.idle"
+	ViperKeyProxyServeAddressHost               = "serve.proxy.host"
+	ViperKeyProxyServeAddressPort               = "serve.proxy.port"
+	ViperKeyAPIServeAddressHost                 = "serve.api.host"
+	ViperKeyAPIServeAddressPort                 = "serve.api.port"
+	ViperKeyAPIReadTimeout                      = "serve.api.timeout.read"
+	ViperKeyAPIWriteTimeout                     = "serve.api.timeout.write"
+	ViperKeyAPIIdleTimeout                      = "serve.api.timeout.idle"
+	ViperKeyPrometheusServeAddressHost          = "serve.prometheus.host"
+	ViperKeyPrometheusServeAddressPort          = "serve.prometheus.port"
+	ViperKeyPrometheusServeMetricsPath          = "serve.prometheus.metrics_path"
+	ViperKeyPrometheusServeCollapseRequestPaths = "serve.prometheus.collapse_request_paths"
+	ViperKeyAccessRuleRepositories              = "access_rules.repositories"
+	ViperKeyAccessRuleMatchingStrategy          = "access_rules.matching_strategy"
 )
 
 // Authorizers
@@ -116,7 +117,7 @@ const (
 )
 
 type ViperProvider struct {
-	l logrus.FieldLogger
+	l *logrusx.Logger
 
 	enabledMutex sync.RWMutex
 	enabledCache map[uint64]bool
@@ -125,7 +126,7 @@ type ViperProvider struct {
 	configCache map[uint64]json.RawMessage
 }
 
-func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
+func NewViperProvider(l *logrusx.Logger) *ViperProvider {
 	return &ViperProvider{
 		l:            l,
 		enabledCache: make(map[uint64]bool),
@@ -206,6 +207,10 @@ func (v *ViperProvider) PrometheusServeAddress() string {
 
 func (v *ViperProvider) PrometheusMetricsPath() string {
 	return viperx.GetString(v.l, ViperKeyPrometheusServeMetricsPath, "/metrics")
+}
+
+func (v *ViperProvider) PrometheusCollapseRequestPaths() bool {
+	return viperx.GetBool(v.l, ViperKeyPrometheusServeCollapseRequestPaths, true)
 }
 
 func (v *ViperProvider) ParseURLs(sources []string) ([]url.URL, error) {

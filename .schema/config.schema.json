@@ -246,9 +246,14 @@
       "properties": {
         "to": {
           "title": "Redirect to",
-          "description": "Set the redirect target. Must be a http/https URL.",
+          "description": "Set the redirect target. Can either be a http/https URL, or a relative URL.",
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference",
+          "examples": [
+            "http://my-app.com/dashboard",
+            "https://my-app.com/dashboard",
+            "/dashboard"
+          ]
         },
         "code": {
           "title": "HTTP Redirect Status Code",
@@ -259,6 +264,13 @@
             302
           ],
           "default": 302
+        },
+        "return_to_query_param": {
+          "title": "URL query parameter",
+          "description": "Adds the original URL the request tried to access to the query parameter.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9,._~-]*$",
+          "default": ""
         },
         "when": {
           "$ref": "#/definitions/configErrorsWhen"
@@ -1098,6 +1110,12 @@
               "default": "/metrics",
               "title": "Path",
               "description": "The path to provide metrics on"
+            },
+            "collapse_request_paths": {
+              "type": "boolean",
+              "default": true,
+              "title": "CollapsePaths",
+              "description": "When set to true the request label will include just the first segment of the request path"
             }
           }
         }
@@ -1757,6 +1775,12 @@
         "mem",
         ""
       ]
+    },
+    "version": {
+      "type": "string",
+      "title": "The Oathkeeper version this config is written for.",
+      "description": "SemVer according to https://semver.org/ prefixed with `v` as in our releases.",
+      "pattern": "^v(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
     }
   },
   "required": [],
